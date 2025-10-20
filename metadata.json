@@ -1,5 +1,0 @@
-{
-  "name": "Medicine Reminder",
-  "description": "A privacy-focused, offline-first medicine reminder application to manage schedules for yourself and your family. All data is stored securely on your device.",
-  "requestFramePermissions": []
-}
