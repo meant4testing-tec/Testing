@@ -40,14 +40,18 @@ export const generatePDFReport = async (data: ReportData): Promise<void> => {
     addImageToDoc(doc, profile.picture, 160, 28, 35, 35);
   }
 
-  const allPastSchedules = schedules.filter(s => new Date(s.scheduledTime) <= endDate);
-  const totalDoses = allPastSchedules.filter(s => s.status === DoseStatus.TAKEN || s.status === DoseStatus.SKIPPED).length;
-  const takenDoses = allPastSchedules.filter(s => s.status === DoseStatus.TAKEN).length;
-  const complianceRate = totalDoses > 0 ? ((takenDoses / totalDoses) * 100).toFixed(1) : 'N/A';
+  // Corrected compliance calculation logic to match dashboard
+  const now = new Date();
+  // Filter for schedules within the report that were actually due (i.e., in the past).
+  const pastSchedules = schedules.filter(s => new Date(s.scheduledTime) < now);
+
+  const totalDueDoses = pastSchedules.length;
+  const takenDoses = pastSchedules.filter(s => s.status === DoseStatus.TAKEN).length;
+  const complianceRate = totalDueDoses > 0 ? ((takenDoses / totalDueDoses) * 100).toFixed(1) : 'N/A';
   
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text(`Overall Compliance: ${complianceRate}%`, 105, 60, { align: 'center' });
+  doc.text(`Overall Compliance: ${complianceRate === 'N/A' ? 'N/A' : `${complianceRate}%`}`, 105, 60, { align: 'center' });
   doc.setLineWidth(0.5);
   doc.line(14, 65, 196, 65);
 
@@ -89,23 +93,11 @@ export const generatePDFReport = async (data: ReportData): Promise<void> => {
   
   const fileName = `${profile.name}_Medication_Report.pdf`;
 
-  // For a native app environment, we must rely on the injected 'share' functionality.
-  // Web-based fallbacks like creating download links are unreliable in WebViews.
-  if (window.aistudio?.share) {
-    try {
-      const pdfBase64 = doc.output('datauristring').split(',')[1];
-      await window.aistudio.share({
-          data: pdfBase64,
-          filename: fileName,
-          mimeType: 'application/pdf',
-      });
-    } catch (error) {
-      console.error("Native PDF sharing failed:", error);
-      alert("Could not share the PDF report. An unexpected error occurred.");
-    }
-  } else {
-    // If the native share API is not available, inform the user.
-    console.warn("`window.aistudio.share` is not available. PDF download is not supported in this environment.");
-    alert("Saving PDF reports is not supported on this device. This feature requires the native app environment.");
+  // Replaced sharing logic with direct download as requested.
+  try {
+    doc.save(fileName);
+  } catch (e) {
+    console.error("PDF download failed:", e);
+    alert("Could not save the PDF report. An unexpected error occurred.");
   }
 };

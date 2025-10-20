@@ -185,12 +185,16 @@ const Dashboard: React.FC<DashboardProps> = ({ profile }) => {
   }, [schedules]);
 
   const adherence = useMemo(() => {
-    const pastSchedules = schedules.filter(s => new Date(s.scheduledTime).getTime() < Date.now() && (s.status === DoseStatus.TAKEN || s.status === DoseStatus.SKIPPED || s.status === DoseStatus.OVERDUE));
+    const now = new Date().getTime();
+    // Get all of today's schedules that were due before now.
+    const pastSchedules = schedules.filter(s => new Date(s.scheduledTime).getTime() < now);
     
     if (pastSchedules.length === 0) return 100;
 
+    // Count how many of those were actually marked as taken.
     const takenCount = pastSchedules.filter(s => s.status === DoseStatus.TAKEN).length;
     
+    // Adherence is (taken doses / total past due doses) * 100
     return (takenCount / pastSchedules.length) * 100;
   }, [schedules]);
   
