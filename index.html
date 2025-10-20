@@ -42,10 +42,10 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          // Construct an absolute URL to the service worker file to avoid
-          // cross-origin issues in sandboxed environments.
-          const swUrl = new URL('sw.js', window.location.href).href;
-          navigator.serviceWorker.register(swUrl)
+          // Register the service worker with a path relative to the origin.
+          // This is more robust than constructing a URL from window.location.href,
+          // which can be invalid in some sandboxed environments (e.g., 'about:blank').
+          navigator.serviceWorker.register('/sw.js')
             .then(registration => console.log('Service Worker registered:', registration))
             .catch(err => console.error('Service Worker registration failed:', err));
         });
