@@ -12,10 +12,16 @@ interface ReportData {
 
 const addImageToDoc = (doc: any, imageData: string, x: number, y: number, w: number, h: number) => {
     try {
-        const img = new Image();
-        img.src = imageData;
-        const format = imageData.split(';')[0].split('/')[1].toUpperCase();
-        doc.addImage(img, format, x, y, w, h);
+        // Fix: Pass raw base64 data to jsPDF instead of an Image object to avoid async loading issues.
+        // This ensures the image is reliably embedded in the PDF.
+        if (imageData.startsWith('data:image')) {
+            const format = imageData.substring(imageData.indexOf('/') + 1, imageData.indexOf(';')).toUpperCase();
+            const base64Data = imageData.substring(imageData.indexOf(',') + 1);
+            doc.addImage(base64Data, format, x, y, w, h);
+        } else {
+            // Fallback for non-data-uri strings, though unlikely with current implementation
+            doc.addImage(imageData, 'JPEG', x, y, w, h);
+        }
     } catch(e) {
         console.error("Failed to add image to PDF", e);
         doc.text('Image could not be loaded', x, y);

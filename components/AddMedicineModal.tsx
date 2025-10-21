@@ -162,7 +162,8 @@ const MedicineFormModal: React.FC<MedicineFormModalProps> = ({ profile, onClose,
                     const intervalHours = durationHours / medicine.frequencyValue;
                     for (let i = 0; i < medicine.frequencyValue; i++) {
                          const scheduleTime = new Date(currentDay);
-                         const hourOffset = i * intervalHours;
+                         // Place the dose in the middle of its time interval for more even spacing
+                         const hourOffset = (i * intervalHours) + (intervalHours / 2);
                          const totalMinutes = (startHour * 60) + (hourOffset * 60);
                          scheduleTime.setHours(Math.floor(totalMinutes / 60) % 24, Math.round(totalMinutes % 60), 0, 0);
                          allDoseTimes.push(scheduleTime);
