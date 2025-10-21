@@ -158,7 +158,7 @@ const App: React.FC = () => {
 
     switch (view) {
       case View.HISTORY:
-        return <HistoryView profile={selectedProfile!} />;
+        return <HistoryView key={selectedProfile!.id} profile={selectedProfile!} />;
       case View.PROFILES:
         return <ProfilesPage profiles={profiles} selectedProfile={selectedProfile} onProfileSelect={handleProfileSelect} onProfilesUpdate={fetchProfiles} />;
       case View.DASHBOARD:
